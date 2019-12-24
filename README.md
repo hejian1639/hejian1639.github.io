@@ -23,7 +23,7 @@
 
 ## 在线阅读
 
-<https://kivy-cn.github.io/Stanford-CS-229-CN>
+<https://hejian1639.github.io/Stanford-CS-229-CN>
 
 ## 贡献指南
 
