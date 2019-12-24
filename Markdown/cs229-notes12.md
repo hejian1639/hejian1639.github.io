@@ -208,7 +208,7 @@ $$
 
 例如，假设我们有一个二维状态空间$(s_1,s_2)$，就可以用下面的网格（grid）来将这个状态空间离散化：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note12f1.png)
+![](../img/cs229note12f1.png)
 
 如上图所示，每个网格单元（grid cell）表示的都是一个独立的离散状态 $\overline s$。这样就可以把一个连续状态 MDP 用一个离散状态的 $(\overline S, A, \{P_{\overline sa}\}, \gamma, R)$ 来进行逼近，其中的$\overline S$ 是离散状态集合，而$\{P_{\overline sa}\}$ 是此离散状态上的状态转移概率（state transition probabilities），其他项目同理。然后就可以使用值迭代（value iteration）或者策略迭代（policy iteration）来求解出离散状态的 MDP $(\overline S, A, \{P_{\overline sa}\}, \gamma, R)$ 的 $V^*(\overline s)$ 和 $\pi^*(\overline s)$。当真实系统是某种连续值的状态 $s \in S$，而有需要选择某个动作来执行，就可以计算对应的离散化的状态 $\overline s$，然后执行对应的动作 $\pi^*(\overline s)$。
 
@@ -216,11 +216,11 @@ $$
 
 要更好理解这样表征的的局限性，可以考虑对下面这一数据集进行函数拟合的监督学习问题：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note12f2.png)
+![](../img/cs229note12f2.png)
 
 很明显，上面这个数据适合使用线性回归。然而，如果我们对 $x$ 轴进行离散化，那么在每个离散间隔中使用分段常数表示，对同样的数据进行拟合，得到的曲线则如下所示：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note12f3.png)
+![](../img/cs229note12f3.png)
 
 这种分段常数表示，对于很多的光滑函数，都不能算好。这会导致输入值缺乏平滑（little smoothing over the inputs），而且在不同的望各单元中间也没有进行扩展（generalization）。使用这种表示方法，我们还需要一种非常精细的离散化过程（也就是网格单元要非常小），才能得到一个比较好的近似估计。
 
@@ -236,7 +236,7 @@ $$
 
 要开发一个值函数近似算法，我们要假设已经有一个对于 MDP 的**模型，** 或者**模拟器。** 简单来看，一个模拟器就是一个黑箱子（black-box），接收输入的任意（连续值的）状态 $s_t$ 和动作 $a_t$，然后输出下一个状态 $s_{t+1}$，这个新状态是根据状态转移概率（state transition probabilities） $P_{s_ta_t}$ 取样（sampled）得来：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note12f4.png)
+![](../img/cs229note12f4.png)
 
 有很多种方法来获取这样的一个模型。其中一个方法就是使用物理模拟（physics simulation）。 例如，在习题集 $4$ 中倒立摆模拟器，就是使用物理定律，给定当前时间 $t$ 和采取的动作 $a$，假设制导系统的所有参数，比如杆的长度、质量等等，来模拟计算在 $t+1$ 时刻杆所处的位置和方向。另外也可以使用现成的物理模拟软件包，这些软件包将一个机械系统的完整物理描述作为输入，当前状态 $s_t$ 和动作 $a_t$，然后计算出未来几分之一秒的系统状态 $s_{t+1}$。$^3$
 

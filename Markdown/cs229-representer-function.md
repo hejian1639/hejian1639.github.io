@@ -192,7 +192,7 @@ $$
 
 上式是关于$J_{\lambda}(\alpha)$的随机梯度。这给我们一个核监督学习问题的随机梯度算法，如图$1$所示。关于算法$1$，有一点需要注意：因为我们为了保持梯度的无偏性而在$\lambda K^{(i)} \alpha_{i}$项上乘了$m$，所以参数$\lambda>0$不能太大，否则算法就会有点不稳定。此外，通常选择的步长是$\eta_{t}=1 / \sqrt{t}$，或者是它的常数倍。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noterff1.png)
+![](../img/cs229noterff1.png)
 
 #### 5 支持向量机
 
@@ -251,11 +251,11 @@ $$
 
 所以这就变成了一个权重，取决于$x$离每个$x^{(i)}$有多近，权重的贡献$\alpha_i$乘以$x$到$x^{(i)}$的相似度，由核函数决定。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noterff2.png)
+![](../img/cs229noterff2.png)
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noterff3.png)
+![](../img/cs229noterff3.png)
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noterff4.png)
+![](../img/cs229noterff4.png)
 
 在图$2$、$3$和$4$中，我们通过最小化下式显示了训练$6$个不同内核分类器的结果：
 
@@ -271,7 +271,7 @@ $$
 
 定义给出了学习分类器进行预测$\sum_{i=1}^{m} K\left(x, x^{(i)}\right) \alpha_{i}>0$和$\sum_{i=1}^{m} K\left(x, x^{(i)}\right) \alpha_{i}<0$的区域。从图中我们看到，对于数值较大的$\tau$的一个非常简单的分类器：它几乎是线性的，而对于$τ=.1$，分类器有实质性的变化，是高度非线性的。为了便于参考，在图$5$中，我们根据训练数据绘制了最优分类器；在训练数据无限大的情况下，最优分类器能最大限度地减小误分类误差。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noterff5.png)
+![](../img/cs229noterff5.png)
 
 #### A 一个更一般的表示定理
 

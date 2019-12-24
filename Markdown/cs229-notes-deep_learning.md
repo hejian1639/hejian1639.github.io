@@ -22,7 +22,7 @@ CS229 Lecture notes
 
 在之前的章节中，我们学到的方法是在数据图像中拟合一条直线。现在咱们不再拟合直线了，而是通过设置绝对最低价格为零来避免有负值房价出现。这就在图中让直线拐了个弯，如图1所示。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf1.png)
+![](../img/cs229notedlf1.png)
 
 我们的目标是输入某些特征$x$到一个函数$f(x)$中，然后输出房子$y$的价格。规范来表述就是：$f:x\rightarrow y$。可能最简单的神经网络就是定义一个单个神经元(neuron)的函数$f(x)$，使其满足$f(x)=\max(ax+b,0)$，其中的$a,b$是参数(coefficients)。这个$f(x)$所做的就是返回一个单值：要么是$(ax+b)$，要么是$0$，就看哪个更大。在神经网络的领域，这个函数叫做一个ReLU（英文读作'ray-lu'），或者叫整流线性单元(rectified linear unit)。更复杂的神经网络可能会使用上面描述的单个神经元然后堆栈(stack)起来，这样一个神经元的输出就是另一个神经元的输入，这就得到了一个更复杂的函数。
 
@@ -30,7 +30,7 @@ CS229 Lecture notes
 
 有了上面提到的这些特征（面积，卧房数，邮编，社区财富状况），就可以决定这个房子的价格是否和其所能承担的最大家庭规模有关。假如家庭规模是房屋面积和卧室数目的一个函数（如图2所示）。邮编(zip code)则可以提供关于邻居走动程度之类的附加信息（比如你能走着去杂货店或者去哪里都需要开车）。结合邮编和邻居的财富状况就可以预测当地小学的教育质量。给了上面这三个推出来的特征（家庭规模，交通便利程度，学校教育质量），就可以依据这三个特征来最终推断房价了。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf2.png)
+![](../img/cs229notedlf2.png)
 
 我们就已经描述了上面这个神经网络了，就如同读者应该已经理解了确定这三个因素来最终影响房屋。神经网络的一个神奇之处就在于你只需要有输入特征向量$x$以及输出$y$，而其他的具体过程都交给神经网络自己来完成。用神经网络学习中介特征(intermediate features)的这个过程叫做端到端学习(end-to-end learning)。
 
@@ -66,7 +66,7 @@ $$
 
 一般来说，$g(z)$都是非线性函数(non-linear function)。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf3.png)
+![](../img/cs229notedlf3.png)
 
 
 回到前面的那个神经网络，第一隐藏层的第一个隐藏单元会进行下面的计算:
@@ -230,13 +230,13 @@ $$
 
 一个神经网络模型包含两个成分:$(i)$网络结构，定义了有多少层，多少个神经元，以及多少个神经元彼此链接;$(ii)$参数（数值values;也称作权重weights）。在这一节，我们要讲一下如何学习这些参数。首先我们要讲一下参数初始化和优化，以及对这些参数的分析。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf4.png)
+![](../img/cs229notedlf4.png)
 
 ### 3.1 参数初始化(ParameterInitialization)
 
 设想一个双层神经网络。左侧的输入是一个拉平的图像向量$x^{(1)},...,x^{(n)}$。在第一个隐藏层中，要注意所有的输入如何连接到下一层中的所有神经元上。这就叫做全连接层(fully connected layer)。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf5.png)
+![](../img/cs229notedlf5.png)
 
 下一步就是计算在这个神经网络中有多少个参数。一种方法是手动向前计算(forward propagation by hand)。
 
@@ -497,7 +497,7 @@ $$
 
 因此我们就要试试卷积神经网络(convolutional neural networks)。设$\theta$不再是一个向量而本身就是一个矩阵。比如在足球这个样例中，设$\theta=R^{4\times4}$。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf6.png)
+![](../img/cs229notedlf6.png)
 
 
 为了简单起见，我们展示一个$64\times 64$的图像但还记得图像实际上是三维的包含了三个通道。现在将参数矩阵$\theta$分散(slide)在图像上。这就如上图中所示在图像左上角位置的加粗方框。要计算激活函数$a$，就要计算$\theta$和$x_{1:4,1:4}$按元素求积(element-wise product)，其中x的下标表示的是从图像x的左上方$4\times4$个像素中取值。然后将按元素求积得到的所有元素加到一起来将矩阵压缩(collapse)成一个单独标量。具体形式为:
@@ -508,6 +508,6 @@ $$
 
 然后将这个窗口向图像右侧轻微移动，然后重复上面的国产。一旦到达了行尾了，就从第二行的开头部位开始。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedlf7.png)
+![](../img/cs229notedlf7.png)
 
 一旦到达了图像末尾，参数$\theta$就已经"检视"过了图片的全部像素了：$\theta_1$就不再只是和左上像素相关联了。结果就是，如论足球出现的位置是图像的右下角或者左上角，神经网络都可以成功探测到。

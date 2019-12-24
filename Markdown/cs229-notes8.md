@@ -35,7 +35,7 @@ $$
 
 为了容易理解这个定理，可以参考下面的图：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note8f1.png)
+![](../img/cs229note8f1.png)
 
 上图中，$f$ 是一个凸函数，在图中用实线表示。另外 $X$ 是一个随机变量，有 $0.5$ 的概率（chance）取值为 $a$，另外有 $0.5$ 的概率取值为 $b$（在图中 $x$ 轴上标出了）。这样，$X$ 的期望值就在图中所示的 $a$ 和 $b$ 的中点位置。
 

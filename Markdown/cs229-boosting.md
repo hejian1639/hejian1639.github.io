@@ -101,9 +101,9 @@ $$
 
 剩下的就是选择特定的坐标来执行坐标下降。我们假设已经使用了如图$1$所示的弱学习器算法，在第$t$次迭代时使用具有分布$p$的训练集作为输入，并返回一个具有边缘分布$(1)$的弱假设$\phi_t$。我们提出总提升算法如图$2$所示。它在迭代$t=1,2,3, \ldots$中进行计算。我们通过弱学习算法在$t$时刻返回的$\left\{\phi_{1}, \dots, \phi_{t}\right\}$来表示假设集。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notebf1.png)
+![](../img/cs229notebf1.png)
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notebf2.png)
+![](../img/cs229notebf2.png)
 
 #### 2 提升的收敛性
 
@@ -208,11 +208,11 @@ $$
 
 这是一个简单的非线性决策规则，但标准线性分类器（如logistic回归）是不可能学习的。在图$3$中，我们展示了logistic回归学习的最佳决策线，其中正例为圆圈，负例为X。很明显，logistic回归对数据的拟合不是特别好。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notebf3.png)
+![](../img/cs229notebf3.png)
 
 然而，对于简单的非线性分类问题$(4)$，使用提升决策树桩可以获得更好的拟合效果。图$4$显示了经过不同次数的提升迭代之后我们学习到的增强分类器，使用的训练集大小为$m = 150$。从图中可以看出，第一个决策残差是将特征$x_1$的阈值设为$s \approx .23$，即对于$s \approx .23$有$\phi(x)=\operatorname{sign}\left(x_{1}-s\right)$。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notebf4.png)
+![](../img/cs229notebf4.png)
 
 ##### 3.3 其他策略
 

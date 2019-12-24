@@ -36,7 +36,7 @@ $$
 
 实际上，这意味着如果我们在集合$C$中取任意两个元素，在这两个元素之间画一条直线，那么这条直线上的每一点都属于$C$。图$1$显示了一个示例的一个凸和一个非凸集。其中点$\theta x +(1-\theta) y$被称作点集$x,y$的**凸性组合(convex combination)。**
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notecof1.png)
+![](../img/cs229notecof1.png)
 
 ##### 2.1 凸集的实例
 
@@ -116,7 +116,7 @@ $$
 
 如果在定义$3.1$的基础上增加严格的不等的条件$x\ne y$和$0<\theta<1$，则可以说一个函数是**严格凸函数**。如果$f$是凸函数则我们可以得到$-f$是**凹函数，** 同理如果$f$是严格凸函数则$-f$是**严格凹函数。**
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notecof2.png)
+![](../img/cs229notecof2.png)
 
 ##### 3.1 凸性的一阶条件
 
@@ -132,7 +132,7 @@ $$
 
 与凸性的定义类似，当严格不等条件成立时$f$是严格凸函数，当不等式符号颠倒时$f$是凹函数，当颠倒的不等式的严格不等条件成立时$f$是严格凹函数。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notecof3.png)
+![](../img/cs229notecof3.png)
 
 ##### 3.2 凸性的二阶条件
 
@@ -516,7 +516,7 @@ idx1 = find(q1y==1);
 plot(q1x(idx0, 1), q1x(idx0, 2), ’rx’); hold on
 ```
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notecof4.png)
+![](../img/cs229notecof4.png)
 
 ```
 plot(q1x(idx1, 1), q1x(idx1, 2), ’go’);

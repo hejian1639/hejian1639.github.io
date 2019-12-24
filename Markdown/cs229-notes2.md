@@ -64,13 +64,13 @@ $$
 
 下面这些样例是一些高斯分布的密度图，如下图所示：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f1.png)
+![](../img/cs229note2f1.png)
 
 最左边的图，展示的是一个均值为$0$（实际上是一个$2\times 1$ 的零向量）的高斯分布，协方差矩阵就是$\Sigma = I$ （一个 $2\times 2$的单位矩阵，identity matrix）。这种均值为$0$ 并且协方差矩阵为单位矩阵的高斯分布也叫做**标准正态分布。** 中间的图中展示的是均值为$0$而协方差矩阵是$0.6I$ 的高斯分布的概率密度函数；最右边的展示的是协方差矩阵$\Sigma = 2I$的高斯分布的概率密度函数。从这几个图可以看出，随着协方差矩阵$\Sigma$变大，高斯分布的形态就变得更宽平（spread-out），而如果协方差矩阵$\Sigma$变小，分布就会更加集中（compressed）。
 
 来看一下更多的样例：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f2.png)
+![](../img/cs229note2f2.png)
 
 上面这几个图展示的是均值为$0$，但协方差矩阵各不相同的高斯分布，其中的协方差矩阵依次如下所示：
 
@@ -87,7 +87,7 @@ $$
 
 第一幅图还跟之前的标准正态分布的样子很相似，然后我们发现随着增大协方差矩阵$\Sigma$ 的反对角线（off-diagonal）的值，密度图像开始朝着  45° 方向 (也就是 $x_1 = x_2$ 所在的方向)逐渐压缩（compressed）。  看一下三个同样分布密度图的轮廓图（contours）能看得更明显：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f3.png)
+![](../img/cs229note2f3.png)
 
 下面的是另外一组样例，调整了协方差矩阵$\Sigma$:
 
@@ -104,13 +104,13 @@ $$
 
 上面这三个图像对应的协方差矩阵分别如下所示：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f4.png)
+![](../img/cs229note2f4.png)
 
 从最左边的到中间`译者注：注意，左边和中间的这两个协方差矩阵中，右上和左下的元素都是负值！`很明显随着协方差矩阵中右上左下这个对角线方向元素的值的降低，图像还是又被压扁了（compressed），只是方向是反方向的。最后，随着我们修改参数，通常生成的轮廓图（contours）都是椭圆（最右边的图就是一个例子）。
 
 再举一些例子，固定协方差矩阵为单位矩阵，即$\Sigma = I$，然后调整均值$\mu$，我们就可以让密度图像随着均值而移动：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f5.png)
+![](../img/cs229note2f5.png)
 
 上面的图像中协方差矩阵都是单位矩阵，即 $\Sigma = I$，对应的均值$\mu$如下所示：
 
@@ -170,7 +170,7 @@ $$
 
 用图形化的方式来表述，这个算法可以按照下面的图示所表示：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note2f6.png)
+![](../img/cs229note2f6.png)
 
 图中展示的点就是训练数据集，图中的两个高斯分布就是针对两类数据各自进行的拟合。要注意这两个高斯分布的轮廓图有同样的形状和拉伸方向，这是因为他们都有同样的协方差矩阵$\Sigma$，但他们有不同的均值$\mu_0$ 和 $\mu_1$ 。此外，图中的直线给出了$p (y = 1|x) = 0.5$ 这条边界线。在这条边界的一侧，我们预测 $y = 1$是最可能的结果，而另一侧，就预测 $y = 0$是最可能的结果。
 

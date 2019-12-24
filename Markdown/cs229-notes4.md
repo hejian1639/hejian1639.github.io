@@ -21,7 +21,7 @@
 
 在讲线性回归的时候，我们讨论过这样的问题：拟合数据的时候，选择线性的“$y = \theta_0 +\theta_1x$”这样的“简单”模型，还是选择多项式的“$y= \theta_0 + \theta_1x+ ...+\theta_5x^5$”这种“复杂”模型。如下图所示：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note4f1.png)
+![](../img/cs229note4f1.png)
 
 如最右侧图所示，用一个五次多项式来进行拟合，得到的并不是一个好模型。而且，虽然这个五次多项式对于训练集中的每一个 $x$（例如之前文中说的居住面积）都给出了非常好的预测的 $y$ 值（对应的就是房屋价格），但是我们也不能指望这个模型能够对训练集之外的点给出靠谱的预测。换句话说，用这种高次多项式来对训练集进行学习得到的模型根本不能扩展运用到其他房屋上面去。一个推测模型（hypothesis）的**泛化误差（generalization error）**（稍后再给出正式定义），正是那些不属于训练集的样本潜在的预期偏差（expected error on examples not necessarily in the training set）。
 
@@ -215,17 +215,17 @@ The fact that we relied on 64-bit floating point makes this argument not entirel
 
 例如，若一个集合由下图所示的三个点组成：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note4f2.png)
+![](../img/cs229note4f2.png)
 
 那么二维线性分类器 $(h(x) = 1\{\theta_0 +\theta_1 x_1 + \theta_2 x_2 \geq 0\})$ 的集合 $H$ 能否将上图所示的这个集合打散呢？答案是能。具体来看则如下图所示，以下八种分类情况中的任意一个，我们都能找到一种用能够实现 “零训练误差（zero training error）” 的线性分类器（linear classifier）：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note4f3.png)
+![](../img/cs229note4f3.png)
 
 此外，这也有可能表明，这个假设类 $H$ 不能打散（shatter）4 个点构成的集合。因此，$H$ 可以打散（shatter）的最大集合规模为 3，也就是说 $VC（H）= 3$。
 
 这里要注意，$H$ 的 $VC$ 维 为3，即便有某些 3 个点的集合不能被 $H$ 打散。例如如果三个点都在一条直线上（如下图左侧的图所示），那就没办法能够用线性分类器来对这三个点的类别进行划分了（如下图右侧所示）。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note4f4.png)
+![](../img/cs229note4f4.png)
 
 换个方式来说，在 $VC$ 维 的定义之下，要保证 $VC(H)$ 至少为 $D$，只需要证明至少有一个规模为 $d$ 的集合能够被 $H$ 打散 就可以了。
 

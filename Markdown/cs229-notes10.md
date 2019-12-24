@@ -25,7 +25,7 @@
 
 举一个不那么麻烦的例子，设想有一个数据集，其中包含的是对一个无线电遥控直升机（radio-controlled helicopters）飞行员协会进行调查得到的数据，其中的 $x_1^{(i)}$ 指代的是飞行员 $i$ 的飞行技能的度量，而 $x_2^{(i)}$ 指代的是该飞行员对飞行的喜爱程度。无线电遥控直升机是很难操作的，只有那些非常投入，并且特别热爱飞行的学生，才能成为好的飞行员。所以，上面这两个属性 $x_1$ 和 $x_2$ 之间的相关性是非常强的。所以我们可以认为在数据中沿着对角线方向（也就是下图中的 $u_1$ 方向）表征了一个人对飞行投入程度的内在“源动力（karma）”，只有少量的噪音脱离这个对角线方向。如下图所示，我们怎么来自动去计算出 $u_1$ 的方向呢？
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note10f1.png)
+![](../img/cs229note10f1.png)
 
 我们接下来很快就要讲到主成分分析算法（PCA algorithm）了。但在运行 PCA 之前，我们首先要进行一些预处理（pre-process），正则化（normalize）数据的均值（mean）和方差（variance），如下所示：
 
@@ -40,15 +40,15 @@
 
 设下面的数据集，我们已经进行了正则化步骤（normalization steps）：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note10f2.png)
+![](../img/cs229note10f2.png)
 
 现在，加入我们选择的单位向量 $u$ 对应了下图中所示的方向。下图中的圆点表示的就是原始数据在这条线上面的投影（projections）。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note10f3.png)
+![](../img/cs229note10f3.png)
 
 可以看到，上面投影得到的数据依然有还算比较大的方差，而这些点距离零点也都比较远。反面样本则如下图所示，我们选择了另外一个方向的单位向量：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229note10f4.png)
+![](../img/cs229note10f4.png)
 
 上面这幅图的投影中的方差就明显小了很多，而且投影得到的点位置也距离原点更近很多。
 我们希望能自动地选择出来如上面两幅图中第一幅那样的方向的单位向量 $u$。要对这个过程进行方程化（formalize），要注意到给定一个向量 $u$ 和一个点 $x$，$x$ 投影到 $u$ 上的投影长度就可以用 $x^T u$ 来得到。也就是说，如果 $x^{(i)}$ 是我们数据集中的一个点（上面几个图中画叉的 $x$ 点中的一个），那么这个点在 $u$ 上的投影（对应的是图中的圆点）就是从原点到 $x^T u$ 的距离。因此，要最大化投影的方差，就要找到一个能够将下面式子最大化的单位长度向量 $u$：

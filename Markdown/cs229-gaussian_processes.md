@@ -151,7 +151,7 @@ $$
 
 >6 有关完整的推导，可以参考[1]`注：参考资料[1]见文章最下方`。或者参考附录，其中给出了一些基于平方补全技巧的参数，请自己推导这个公式！
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notegpf1.png)
+![](../img/cs229notegpf1.png)
 
 图1：一维线性回归问题的贝叶斯线性回归$y^{(i)}=\theta x^{(i)}+\epsilon^{(i)}$，其中噪音独立同分布的服从$\epsilon^{(i)}\sim \mathcal{N}(0,1)$。绿色区域表示模型预测的$95\%$置信区间。注意，绿色区域的（垂直）宽度在末端最大，但在中部最窄。这个区域反映了参数$\theta$估计的不确定性。与之相反，经典线性回归模型会显示一个等宽的置信区域，在输出中只反映噪声服从$\mathcal{N}(0,\sigma^2)$。
 
@@ -218,7 +218,7 @@ $$
 
 ##### 3.3 平方指数核
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notegpf2.png)
+![](../img/cs229notegpf2.png)
 
 图2：样本来自于一个零均值高斯过程，以$k_{S E}(\cdot, \cdot)$为先验协方差函数。使用(a) $\tau=0.5,$ (b) $\tau=2,$ and $(\mathrm{c}) \tau=10$。注意,随着带宽参数$\tau$的增加，然后点比以前更远会有较高的相关性，因此采样函数往往整体是流畅的。
 
@@ -251,7 +251,7 @@ $$
 
 ##### 4.1 高斯过程回归模型
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notegpf3.png)
+![](../img/cs229notegpf3.png)
 
 图3：高斯过程回归使用一个零均值高斯先验过程，以$k_{S E}(\cdot, \cdot)$为协方差函数（其中$\tau=0.1$），其中噪声等级为$\sigma=1$以及$(a)m=10,(b) m=20，(c)m=40$训练样本。蓝线表示后验预测分布的均值，绿色阴影区域表示基于模型方差估计的$95%$置信区间。随着训练实例数量的增加，置信区域的大小会缩小，以反映模型估计中不确定性的减少。还请注意，在图像$(a)$中，$95%$置信区间在训练点附近缩小，但在远离训练点的地方要大得多，正如人们所期望的那样。
 

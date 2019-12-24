@@ -30,7 +30,7 @@ $$
 
 决策树算法则可以直接产生非线性假设函数，不用去先生成合适的特征映射。接下来这个例子很振奋人心(加拿大风格的)，假设要构建一个分类器，给定一个时间和一个地点，要来预测附近能不能滑雪。为了简单起见，时间就用一年中的月份来表示，而地点就用纬度(latitude)来表示(北纬南纬，-90°表示南极，0°表示迟到，90°表示南极)。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf1.png)
+![](../img/cs229notedtf1.png)
 
 有代表性的数据结构如上图左侧所示。不能划分一个简单的线性便捷来正确区分数据集。不过可以很明显可以发现数据集中的空间中有可以鼓励出来的不同区域，一种划分方式如上图中右侧所示。上面这个分区过程(partitioning)开通过对输入空间$x$分割成不相连接的自己(或者区域)$R_i$:
 
@@ -56,7 +56,7 @@ $$
 
 下面就着滑雪数据集来应用上面这样的过程。在步骤a当中，将输入空间$\mathcal{X}$根据地理位置特征切分，阈值设置的是$15$，然后得到了子区域$R_1,R_2$。在步骤b，选择一个子区域(例子中选的是$R_2$)来递归进行同样的操作，选择时间特征，阈值设为$3$，然后生成了二级子区域$R_{21},R_{22}$。在步骤c，对剩下的叶节点($R_1,R_{21},R_{22}$)任选一饿，然后继续上面的过程，知道遇到了一个给定的停止条件(stop criterion，这个稍后再介绍)，然后再预测每个节点上的主要类别。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf2.png)
+![](../img/cs229notedtf2.png)
 
 ## 3 定义损失函数(Defining a Loss Function)
 
@@ -74,7 +74,7 @@ $$
 
 这个可以理解为在预测区域$R$上的主要类别中发生错误分类的样本个数。虽然误分类损失函数是我们关心的最终值，但这个指标的对类别概率的变化并不敏感。举个例子，如下图所示的二值化分类。我们明确描述了父区域$R_p$，也描述了每个区域上的正负值的个数。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf3.png)
+![](../img/cs229notedtf3.png)
 
 第一个切分就是讲搜有的正值分割开来，但要注意到:
 
@@ -101,7 +101,7 @@ L_{cross}(R)=L_{cross}(\hat p)=- \hat p\log \hat p -(1-\hat p)\log(1-\hat p)\\
 \end{aligned}
 $$
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf4.png)
+![](../img/cs229notedtf4.png)
 
 上图左侧中看到的是交叉熵损失函数在$\hat p$上的投图。从前文中样本中的第一个分割得到的区域$(R_p,R_1,R_2)$然后也对其损失函数进行了投图。交叉熵损失函数是严格的凹函数(concave)，可以从投图中明显看出(证明起来也很容易)只要$\hat p_1 \ne \hat p_2$以及两个子区域都是非空的，则子区域损失函数的加权和总会小于父区域。
 
@@ -128,7 +128,7 @@ $$
 决策树的一大优点就是很适合用于处理分类变量。例如在滑雪数据集里面的地点就可以替代城任意的分类数据(Northern Hemisphere,
 Southern Hemisphere, 或者 Equator （也就是$loc in\{N,S,E\}$）。相比独热编码(one-hot encoding)或者类似的预处理步骤来讲数据转换到定量特征，这些方法对于之前见过的其他算法来说是必要的，但对于决策树算法来说，可以直接探测子集成员。本章第2节中的最终树形可以写成如下的形式:
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf5.png)
+![](../img/cs229notedtf5.png)
 
 需要注意的就是要留神避免变量有太多的分类。对于一个分类集合$S$，我们的潜在问题集合及就是幂集合(power set)$P(S)$，基数(cardinality)为$2^{|S|}$。因此分类类别太多了就可能是问题选择的计算变得很难。对于二值化分类来说优化倒是可能的，虽然即便这时候也应该考虑将特征重新格式化成定量的而不是使用大规模的潜在阈值然后任它们严重过拟合。
 
@@ -152,7 +152,7 @@ Southern Hemisphere, 或者 Equator （也就是$loc in\{N,S,E\}$）。相比独
 
 决策树的一个重要缺陷就是不能轻易捕获加性结构。例如如下图作图所示，简单的分裂便捷形式$x_1+x_2$只能用于对很多分类模型进行近似，每个分类都可能每次产生一个$x_1$或者$x_2$。而下图右侧的线性模型则直接推导出了这个边界。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notedtf6.png)
+![](../img/cs229notedtf6.png)
 
 要让决策边界同时从多个特征中寻找因子，还需要很多的工作，随着未来变量的增加，可解释性就会降低，这也是个缺陷。
 

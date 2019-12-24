@@ -104,7 +104,7 @@ $$
 
 上文所讲的袋装法(Bagging)是一种将地方插的技术，而这次要讲的推进发(Boosting)则是降低偏差的(bias-reduction)。因此我们想要高偏差低方差的模型，也就是弱学习模型(weak learners)。考虑到在介绍决策树的时候做的解释，可以将决策树在进行预测之前只允许进行一次决策，就能使之成为弱学习模型;这样就成了决策树桩(decision stumps)。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noteemf1.png)
+![](../img/cs229noteemf1.png)
 
 上面的例子可以用于直观理解一下推进法(Boosting)背后的思想。开始时是左边的数据及，然后进行单词决策树桩的训练，如中间图所示。关键思想是接下来要看那些样品被分类错了，然后增加他们和其他正确分类的样品相比的相对权重。然后在训练一个新的决策树桩，这个就会更倾向于将这些特殊值(hard negatives)进行正确的分类。然后继续这样，逐渐在每一步中对样品重新评估权重，最后输出的就是一系列这些弱学习模型(weak learners)的结合，就是一个集成分类器(classier)了。
 
@@ -112,7 +112,7 @@ $$
 
 简单介绍了直观理解之后，接下来看一种最流行的推进法(boosting)算法:Adaboost，过程如下所示:
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noteemf2.png)
+![](../img/cs229noteemf2.png)
 
 每个样本的权重开始的时候都是偶数(begin out even)，误分类样本会在每一步被进一步更新权重，以累积的形式(in a cumulative fashion)。最终得到的累加分类器是对所有弱学习模型(weak learners)的总和(summation)，权重是加权误差(weighted error)的负对数概率(negative log-odds)。
 
@@ -124,7 +124,7 @@ Adaboost中用到的确切权重似乎第一眼看上去很随意，但实际上
 
 这个算法如下所示，也是一个集成学习方法:
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229noteemf3.png)
+![](../img/cs229noteemf3.png)
 
 闭合检查(close inspection)表明对目前的学习问题进行了很少的假设，主要的就都是集成学习算法的可加性本质以及在一个给定步骤后之前所有的权重和参数的固定。这次还是要用到弱分类器$G(x)$，虽然这时候我们会用参数$\gamma$来进行参数化。在每一步我们都是要找到下一个若学习模型的参数和权重来使得当前的集成学习算法能够最适合剩余的误差。
 

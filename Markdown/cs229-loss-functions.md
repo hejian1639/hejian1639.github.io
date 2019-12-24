@@ -54,7 +54,7 @@ $$
 
 在这种情况下，损失$J(\theta)$是简单的参数$\theta$在训练集上使得结果错误（误分类）的平均数量。不幸的是，损失函数$\phi_{zo}$是不连续、非凸的（为什么会出现这种情况的解释有点超出本课程的范围了），甚至更令人烦恼的是，使其最小化是一个$NP$难问题。因此，我们更愿意选择具有图$1$中所示形状的损失。也就是说，我们基本上总是使用满足下面条件的损失:
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notelff1.png)
+![](../img/cs229notelff1.png)
 
 $$
 \varphi(z) \rightarrow 0 \text { as } z \rightarrow \infty, \quad \text { while } \varphi(z) \rightarrow \infty \text { as } z \rightarrow-\infty
@@ -82,7 +82,7 @@ $$
 
 在图$2$中，我们画出了这些损失相对于边界$z=y x^{T} \theta$的图像，注意随着边界增长，每个损失函数都趋于零，并且每个损失函数往往随着边界负向增长而趋近$+\infin$。不同的损失函数将产生不同的机器学习过程；特别要指出，logistic损失$\varphi_{\text { logistic }}$对应于逻辑回归问题，铰链损失$\varphi_{\text { hinge }}$产生所谓的支持向量机，以及指数损失产生的经典的提升版本，这两个我们以后将更深入地探讨。
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notelff2.png)
+![](../img/cs229notelff2.png)
 
 #### 2. 逻辑回归
 
@@ -110,7 +110,7 @@ $$
 
 如图$3$所示。特别的，sigmoid函数满足：
 
-![](https://raw.githubusercontent.com/Kivy-CN/Stanford-CS-229-CN/master/img/cs229notelff3.png)
+![](../img/cs229notelff3.png)
 
 $$
 g(z)+g(-z)=\frac{1}{1+e^{-z}}+\frac{1}{1+e^{z}}=\frac{e^{z}}{1+e^{z}}+\frac{1}{1+e^{z}}=1
