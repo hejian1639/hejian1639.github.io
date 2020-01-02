@@ -1,14 +1,15 @@
-# 目的
-之前就想做一期关于高并发相关的分享，主要是面向新人的，也因为之前修改的一段代码，感觉即使是老员工其实也也会有所收获吧
-# java高并发程序设计
+#目的
+之前就想做一期关于高并发相关的分享，主要是面向新人的，因为之前修改前人代码，感觉即使是老员工其实也也会有所收获吧
+#资料
 
-咱们的话题主要以java为主，也会提一下c或者go做一下对比。下面引用的参考知识主要来源于此书，估计看标题大家会联想到集群的高并发，可能会让某些人失望了，咱们还是集中在单机的高并发上。
+咱们的话题主要以java为主，也会提一下c或者go做一下对比。下面列了一下参考的资料。
 
-![图书](https://img1.doubanio.com/view/subject/l/public/s29405037.jpg)
+![book](https://img1.doubanio.com/view/subject/l/public/s29405037.jpg)
 
+![book](https://static001.infoq.cn/resource/image/98/15/981342d3b328a5e4ca7051c69a1d3b15.jpg?x-oss-process=image/resize,h_496)
 
-# 如何评价代码好坏
-先聊一下什么是评价代码好坏的标准，要衡量这点我把它分为主观的和客观的。
+#如何评价代码好坏
+先聊一个题外话，什么是评价代码好坏的标准，要衡量这点我把它分为主观的和客观的。
 下面的话题以满足需求为前提
 
 ##主观
@@ -23,7 +24,7 @@
 
 ##客观
 客观的不充分但是可衡量
-### 封装性
+###封装性
 模块化是衡量代码可维护性的一个有效标尺，它让你的代码具有了复用性，如果有很多雷同代码大块的出现，是应该反思一下了。
 
 ###可扩展性
@@ -58,7 +59,69 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
 
 ###线程
 线程本质和进程的共同点是可以分到单独的cpu时间片，只是存储不隔离，这点即是灵活的地方，也是它的原罪。
-###同步粒度
+
+###同步
+
+####基本概念
+1. Java内存模型抽象
+
+ 虽然讲的是并发问题，但是避免不了和内存打交道。这里不会介绍太多虚拟机层面的东西，只是将内存简化为两部分共享存储（内存）和局域存储（寄存器），便于对可见性的理解
+
+ ![screenshot](http://ifeve.com/wp-content/uploads/2013/04/cpu.png)
+
+2. 重新排序 
+ - 编译优化 
+ - 指令并行重排
+ - 内存系统重现排序
+
+ ![screenshot](instruct.png)
+ 
+     
+     
+    <table style="width:100%">
+      <tr>
+        <th> Process A </th>
+        <th> Process B </th> 
+      </tr>
+      <tr>
+        <td> a = 1 <br> x = b </td>
+        <td> b = 1 <br> y = a </td>
+      </tr>
+      <tr>
+        <td colspan='2'>初始状态：a = b = 0 <br> 可能出现结果：x = y = 0</td>
+      </tr>
+    </table>
+
+
+
+3. happen-before
+
+    ```java
+    double pi = 3.14; //A
+    double r = 1; //B
+    double area = pi*r*r; //C
+    
+    ```
+    
+    A ==> C <br>
+    B ==> C
+    
+4. 内存屏障
+
+    |屏障类型|指令示例|指令示例|
+    |:-:|:-:|:-:|
+    |LoadLoad屏障|Load1; LoadLoad; Load2|在Load2及后续读取操作要读取的数据被访问前，保证Load1要读取的数据被读取完毕|
+    |StoreStore屏障|Store1; StoreStore; Store2|在Store2及后续写入操作执行前，保证Store1的写入操作对其它处理器可见|
+    |LoadStore屏障|Load1; LoadStore; Store2|在Store2及后续写入操作被刷出前，保证Load1要读取的数据被读取完毕|
+    |StoreLoad屏障| Store1; StoreLoad; Load2|在Load2及后续所有读取操作执行前，保证Store1的写入对所有处理器可见|
+  
+
+####同步原语 
+
+- synchronized
+- volatile
+- lock
+- atomic
 
 ###优化实例
 
