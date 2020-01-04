@@ -13,7 +13,7 @@
 下面的话题以满足需求为前提
 
 ##主观
-主观方面大家会提很多理念，初衷不错，但是难以衡量，或者说实施方式很难标准化
+主观方面以理念为主，例如可读性可维护性，可维护性等。
 ###可读性
 可读性会被很多初级开发奉为信条，这里并不是去反对可读性，但是人们对可读性的判断依据比较模糊，也不好衡量
 
@@ -23,7 +23,8 @@
 这不是说不要大家写注释，毕竟可读性高的代码理解成本低，重写起来也容易。
 
 ##客观
-客观的不充分但是可衡量
+客观方面考察方式会比较直观，以模块的可扩展性，解藕为考察重点
+
 ###封装性
 模块化是衡量代码可维护性的一个有效标尺，它让你的代码具有了复用性，如果有很多雷同代码大块的出现，是应该反思一下了。
 
@@ -63,11 +64,11 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
 ###同步
 
 ####基本概念
-1. Java内存模型抽象
+1. 内存模型抽象
 
  虽然讲的是并发问题，但是避免不了和内存打交道。这里不会介绍太多虚拟机层面的东西，只是将内存简化为两部分共享存储（内存）和局域存储（寄存器），便于对可见性的理解
 
- ![screenshot](http://ifeve.com/wp-content/uploads/2013/04/cpu.png)
+ ![screenshot](memory.png)
 
 2. 重新排序 
  - 编译优化 
@@ -77,7 +78,8 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
  ![screenshot](instruct.png)
  
      
-     
+    重新排序在多线程情况下会出现难以直观理解的现象
+    
     <table style="width:100%">
       <tr>
         <th> Process A </th>
@@ -94,19 +96,16 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
 
 
 
-3. happen-before
+    
+3. 数据依赖性
 
-    ```java
-    double pi = 3.14; //A
-    double r = 1; //B
-    double area = pi*r*r; //C
+ 即使有重新排序的可能，但是仍然遵循数据依赖规则
+![screenshot](dependency.png)
     
-    ```
-    
-    A ==> C <br>
-    B ==> C
     
 4. 内存屏障
+
+ 除了数据依赖规则还可以通过cpu指令来阻止重新排序
 
     |屏障类型|指令示例|指令示例|
     |:-:|:-:|:-:|
@@ -115,13 +114,91 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
     |LoadStore屏障|Load1; LoadStore; Store2|在Store2及后续写入操作被刷出前，保证Load1要读取的数据被读取完毕|
     |StoreLoad屏障| Store1; StoreLoad; Load2|在Load2及后续所有读取操作执行前，保证Store1的写入对所有处理器可见|
   
+3. happen-before
+ 
+ 为了化简对内存模型的理解难度，提出了happen before规则
+ 
+ 定义:
+ 
+ - 如果一个操作happens-before另一个操作，那么第一个操作的执行结果将对第二个操作可见，而且第一个操作的执行顺序排在第二个操作之前。 
+ - 两个操作之间存在happens-before关系，并不意味着一定要按照happens-before原则制定的顺序来执行。如果重排序之后的执行结果与按照happens-before关系来执行的结果一致，那么这种重排序并不非法。
+
+ 
+ 规则:
+ 
+ - 程序次序规则：一个线程内，按照代码顺序，书写在前面的操作先行发生于书写在后面的操作；
+ - 锁定规则：一个unLock操作先行发生于后面对同一个锁额lock操作；
+ - volatile变量规则：对一个变量的写操作先行发生于后面对这个变量的读操作；
+ - 传递规则：如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C；
+ - 线程启动规则：Thread对象的start()方法先行发生于此线程的每个一个动作；
+ - 线程中断规则：对线程interrupt()方法的调用先行发生于被中断线程的代码检测到中断事件的发生；
+ - 线程终结规则：线程中所有的操作都先行发生于线程的终止检测，我们可以通过Thread.join()方法结束、Thread.isAlive()的返回值手段检测到线程已经终止执行；
+ - 对象终结规则：一个对象的初始化完成先行发生于他的finalize()方法的开始；
+     
+    ```java
+    //thread 1
+    a = 1;
+    b = a;
+     
+    //tread 2
+    if(b == 1){
+        assert(a == 1)
+    }
+    ```
+    ```java
+    //thread 1
+    a = 1;
+    b = 1;
+     
+    //tread 2
+    if(b == 1){
+        assert(a == 1)
+    }
+    ```
 
 ####同步原语 
+- 静态初始化
 
-- synchronized
-- volatile
-- lock
-- atomic
+这点经常被人忽略，但是类加载线程安全，这点是虚拟机保证的
+
+```java
+public class Resource {
+    private static Resource resource;
+
+    static {
+        resource = new Resource();
+
+    }
+
+    public static Resource getInstance() {
+        return resource;
+    }
+}
+
+```
+
+- ####synchronized
+
+ synchronized编译成字节码后，是通过monitorenter（入锁）和monitorexit（出锁）两个指令实现的，具体过程如下：
+
+![screenshot](https://upload-images.jianshu.io/upload_images/1529069-cb6b5eae2b68efd9.png?imageMogr2/auto-orient/strip|imageView2/2/w/347)
+
+- ####volatile
+
+ volatile除了可以阻止编译优化还会自动加入内存屏障
+ 
+ - 写操作
+ 
+ ![screenshot](https://upload-images.jianshu.io/upload_images/1529069-333fa42581e1aa03.png?imageMogr2/auto-orient/strip|imageView2/2/w/568)
+ 
+ - 读操作
+ 
+ ![screenshot](https://upload-images.jianshu.io/upload_images/1529069-35ae750988d40a79.png?imageMogr2/auto-orient/strip|imageView2/2/w/640)
+- ####lock
+
+ 锁可以理解为将synchronized拆成两部分，所以自带内存屏障的语义，即读操作不能重排到lock之前，写操作不能重排到unlock之后
+
+- ####atomic
 
 ###优化实例
 
