@@ -25,8 +25,9 @@
 ##客观
 客观方面考察方式会比较直观，以模块的可扩展性，解藕为考察重点
 
-###封装性
+###模块化
 模块化是衡量代码可维护性的一个有效标尺，它让你的代码具有了复用性，如果有很多雷同代码大块的出现，是应该反思一下了。
+模块化很容易教条化，例如早期流行的TDD（测试驱动开发）曾经流行的观点，每个类都可以测试，在AOP技术还不是很发达的时候，这是一个对开发人员一个相当强的模块化约束。据我十多年的开发经验，一个可行性较高的建议是工程中定义的最小物理模块就是你的测试单元，这样既省人力，也是对架构的尊重。
 
 ###可扩展性
 唯一不变的就是需求的变化，这是在软件界算是一个真理了。这个世界应该没有能适应所有变化的设计，如果非说有那估计就是无设计，毕竟人们对不存在的东西很难挑出毛病。不过程序猿们还是有追求的，不想要在不断的搬砖过程中蹉跎，所以就有了上面的模块化的概念，但是也不是随便模块化，这里面衡量标准就是是不是每次应对需求都要改变底层模块。
@@ -64,9 +65,13 @@ MapReduce最早是Google提出的大数据处理的软件架构，这种抽象�
 ###同步
 
 ####基本概念
+1. 并发三大特性
+
+    要正确地理解Java多线程问题，要求我们必须深刻的理解“原子性”、“有序性”、“可见性”这三个非常重要和关键的特性
+
 1. 内存模型抽象
 
- 虽然讲的是并发问题，但是避免不了和内存打交道。这里不会介绍太多虚拟机层面的东西，只是将内存简化为两部分共享存储（内存）和局域存储（寄存器），便于对可见性的理解
+ 虽然讲的是并发问题，但是避免不了和内存打交道。这里不会介绍太多虚拟机层面的东西，只是将内存简化为两部分共享存储（内存）和局域存储（寄存器，缓存），便于对可见性的理解
 
  ![screenshot](memory.png)
 
@@ -196,16 +201,326 @@ public class Resource {
  ![screenshot](https://upload-images.jianshu.io/upload_images/1529069-35ae750988d40a79.png?imageMogr2/auto-orient/strip|imageView2/2/w/640)
 - ####lock
 
- 锁可以理解为将synchronized拆成两部分，所以自带内存屏障的语义，即读操作不能重排到lock之前，写操作不能重排到unlock之后
+ 锁可以理解为将synchronized拆成两部分，所以自带内存屏障的语义，lock前加入acquire屏障，unlock后加入release屏障
+
+ Java 8 自带的锁有三种：可重入锁，读写锁和StampedLock。
+ 可重入锁的默认版本是非公平锁，公平锁和非公平锁的差别是是否按照顺序取得锁
+ 
 
 - ####atomic
+原子操作可以理解为一种轻量锁，但是内表达的语义也有些，包含读写，自增，自减，交换，CAS等。
+
+
+#####从粒度上比较
+volatile, atomic 小于 lock 小于 sychronized
+
+#####从灵活性上比较
+lock 大于 sychronized 大于 volatile, atomic
+
+原子操作的粒度虽然很小但是受制于原子操作原语有限所以能表达的语义也有限，sychronized 可以完成的lock也能完成，但是lock能完成的sychronized却未必可以。
+性能上synchronized也没有那么万恶，Java 6之后锁一共有4中状态,级别从低到高依次是:无锁状态、偏向锁状态、轻量级锁状态和重量级锁状态，这几个状态会随着竞争情况逐渐升级。
+
+#####内存屏障
+
+这里再次提到内存屏障是因为在Java中没有任何API可以直接调用，只是以上的同步元语的副作用，下面引用一个C++的例子来说明：
+
+```c++
+int data = 0;
+std::atomic_int cpp_atomic_int(0);
+
+extern "C" void producer() {
+    data = 42;
+    std::atomic_thread_fence(std::memory_order_release);
+    cpp_atomic_int.store(1, std::memory_order_relaxed);
+}
+
+extern "C" void consumer() {
+    int p2;
+    while (!(p2 = cpp_atomic_int.load(std::memory_order_relaxed)));
+    std::atomic_thread_fence(std::memory_order_acquire);
+    assert(p2 == 1); // 绝无问题
+    assert(data == 42); // 绝无问题
+}
+
+int main() {
+    std::thread t1(producer);
+    std::thread t2(consumer);
+    t1.join();
+    t2.join();
+}
+
+```
 
 ###优化实例
 
-###协程
+下面结合猎豹项目来说明一个优化的例子
 
+优化前
+
+```java
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Lock r = lock.readLock();
+    private final Lock w = lock.writeLock();
+
+...
+
+   private void refreshConfig(List<Application> configApps, Map<String, String> configLocations) {
+        configApps.forEach(Application::init);
+        // 初始化域名到业务的对照关系，供DNS使用
+        ArrayListMultimap<String, String> multiMap = ArrayListMultimap.create();
+        for (Application app : configApps) {
+            if (!app.isIp) {
+                multiMap.put(app.domainOrIp, app.id);
+            }
+        }
+
+        Splitter splitter = Splitter.on(',').omitEmptyStrings().trimResults();
+        TreeRangeMap<Long, String> treeRangeMap = TreeRangeMap.create();
+
+        for (Map.Entry<String, String> location : configLocations.entrySet()) {
+            String id = location.getKey();
+            String ips = location.getValue();
+            splitter.split(ips).forEach(it -> {
+                try {
+                    Range<Long> range = IpV4Ranges.toRange(it).range;
+                    treeRangeMap.put(range, id);
+                } catch (Exception e) {
+                    // 忽略无效的数据
+                }
+            });
+        }
+
+        w.lock();
+        try {
+            appMapGroupByIp.clear();
+            appMapGroupByDomain.clear();
+            Set<String> appIds = new HashSet<>(configApps.size());
+            for (Application app : configApps) {
+                String domainOrIp = app.domainOrIp;
+                if (!Strings.isNullOrEmpty(domainOrIp)) {
+                    if (app.isIp) {
+                        appMapGroupByIp.put(domainOrIp, app);
+                    } else {
+                        appMapGroupByDomain.put(domainOrIp, app);
+                    }
+                    appIds.add(app.id);
+                } else {
+                    log.warn("不合理的业务: domainOrIp没有值，{}", app);
+                }
+            }
+            // 业务改变时，http判断时生成的缓存需要被同步改变
+            // 删除已经不存在的业务（变动的业务由HTTP判断过程进行更新）
+            List<String> deletedApps = app2IpPort.keySet().stream()
+                    .filter(it -> !appIds.contains(it)).collect(Collectors.toList());
+            if (!deletedApps.isEmpty()) {
+                deletedApps.forEach(app2IpPort::remove);
+                repackIpPorts();
+            }
+
+            ipRangeLocations.clear();
+            ipRangeLocations.putAll(treeRangeMap);
+            host2Apps.clear();
+
+            multiMap.asMap().forEach((host, apps) ->
+                    host2Apps.put(host, Lists.newArrayList(apps.iterator()))
+            );
+        } finally {
+            w.unlock();
+        }
+    }
+```
+
+优化后
+
+```java
+    private volatile Ip2AppTable ip2AppTable;
+
+....
+
+    private void refreshConfig(List<Application> configApps, Map<String, String> configLocations) {
+
+        List<ApplicationUrl> configAppUrls = configApps.stream().flatMap(Application::split).collect(Collectors.toList());
+
+        Ip2AppTable localIp2AppTable = new Ip2AppTable();
+        // 初始化域名到业务的对照关系，供DNS使用
+        ArrayListMultimap<String, String> multiMap = ArrayListMultimap.create();
+        for (ApplicationUrl app : configAppUrls) {
+            if (!app.isIp) {
+                multiMap.put(app.domainOrIp, app.id);
+            }
+            localIp2AppTable.levelTree.add(app);
+        }
+
+
+        Splitter splitter = Splitter.on(',').omitEmptyStrings().trimResults();
+        localIp2AppTable.ipRangeLocations = TreeRangeMap.create();
+
+        for (Map.Entry<String, String> location : configLocations.entrySet()) {
+            String id = location.getKey();
+            String ips = location.getValue();
+            splitter.split(ips).forEach(it -> {
+                try {
+                    Range<Long> range = IpV4Ranges.toRange(it).getRange();
+                    localIp2AppTable.ipRangeLocations.put(range, id);
+                } catch (Exception e) {
+                    // 忽略无效的数据
+                }
+            });
+        }
+
+
+        for (ApplicationUrl app : configAppUrls) {
+            String domainOrIp = app.domainOrIp;
+            if (!Strings.isNullOrEmpty(domainOrIp)) {
+                if (app.isIp) {
+                    putAppMap(localIp2AppTable.appMapGroupByIp, new Pair<>(domainOrIp, app.port), app);
+                    putIpPort2App(localIp2AppTable.ipPort2App, new Pair<>(domainOrIp, app.port), app.id);
+                } else {
+
+                    putAppMap(localIp2AppTable.appMapGroupByDomain, new Pair<>(domainOrIp, app.port), app);
+                    String ip = ip2Host.get(domainOrIp);
+                    if (ip != null) {
+                        putIpPort2App(localIp2AppTable.ipPort2App, new Pair<>(ip, app.port), app.id);
+
+                    }
+                }
+            } else {
+                log.warn("不合理的业务: domainOrIp没有值，{}", app);
+            }
+        }
+
+        multiMap.asMap().forEach((host, apps) -> localIp2AppTable.host2Apps.put(host, Lists.newArrayList(apps.iterator())));
+
+        ip2AppTable = localIp2AppTable;
+    }
+```
+
+###协程
+- 背景
+ 
+ 协程（coroutine）Windows上叫纤程(fiber)，可以理解为非抢占式线程，即无系统调度，需要主动释放cpu，既有独立的栈空间又不用担心并发同步问题，所以被高并发中广泛使用。不过缺点是很多语言对此并不支持，C/C++上有一些非跨平台的第三方框架，Python 3.5+和GO等语言层面支持。
+
+- Java 中的实现
+ 
+ Java目前有两种方案一种是虚拟机支持，另一种是第三方框架
+ 
+ 1. 虚拟机
+
+        Java官方JDK并不支持协程，目前OpenJDK中阿里的AJDK号称支持了协程，但是是内部使用的而且貌似只支持Linux，不知什么时候开源。这种方案对优势是对开发者透明，不用担心三方模块的兼容性问题
+ 
+ 2. 三方框架
+
+        由于Java没有官方的协程支持，比较主流的开发模式是异步+流式模型（后面会做介绍）。流式模型使用上会把逻辑碎片化所以还是有一定的维护成本，所以以Quasar为代表的纤程库应运而生。其主要原理是通过byte code Instrument，把编译后同步程序class文件修改为异步的操作。
+        
+        下面看一段示例代码：
+
+    ```java
+    //定义两个Channel
+    Channel<Integer> naturals = Channels.newChannel(-1);
+    Channel<Integer> squares = Channels.newChannel(-1);
+    
+    //运行两个Fiber实现.
+    new Fiber(() -> {
+        for (int i = 0; i < 10; i++)
+            naturals.send(i);
+        naturals.close();
+    }).start();
+    
+    new Fiber(() -> {
+        Integer v;
+        while ((v = naturals.receive()) != null)
+            squares.send(v * v);
+        squares.close();
+    }).start();
+    
+    printer(squares);
+    ```
+    Quasar这类框架的最大问题就是和三方库的兼容性，comsat的目的是基于Quasar对三方框架做桥接的库。
+    
+    | Feature                                                                                                                   | Artifact
+    |---------------------------------------------------------------------------------------------------------------------------|--------------------------
+    | Servlet integration for defining fiber-per-request servlets.                                                              | `co.paralleluniverse:comsat-servlet:0.7.0`
+    | A fiber-blocking Clojure [Ring](https://github.com/ring-clojure/ring) adapter based on Jetty 9.3.                         | `co.paralleluniverse:comsat-ring-jetty9:0.7.0`
+    | [HTTP Kit](http://www.http-kit.org/client.html)-based fiber-blocking HTTP client.                                         | `co.paralleluniverse:comsat-httpkit:0.7.0`
+    | [Jersey server](https://jersey.java.net/) integration for defining REST services.                                         | `co.paralleluniverse:comsat-jersey-server:0.7.0`
+    | [Dropwizard](http://dropwizard.io/) integration including Jersey, ApacheHttpClient and JDBI.                              | `co.paralleluniverse:comsat-dropwizard:0.7.0`
+    | [Spring Framework](http://projects.spring.io/spring-framework/) Web MVC fiber-blocking controller methods integration.    | `co.paralleluniverse:comsat-spring-webmvc:0.7.0`
+    | [Spring Boot](http://projects.spring.io/spring-boot/) auto-configuration support for Web MVC controllers.                 | `co.paralleluniverse:comsat-spring-boot:0.7.0`
+    | [Spring Security](http://projects.spring.io/spring-security/) configuration support for fibers.                           | `co.paralleluniverse:comsat-spring-security:0.7.0`
+    | [JAX-RS client](https://jersey.java.net/documentation/latest/client.html) integration for HTTP calls with fibers.         | `co.paralleluniverse:comsat-jax-rs-client:0.7.0`
+    | [ApacheHttpClient](http://hc.apache.org/httpcomponents-client-ga/) integration for HTTP calls with fibers.                | `co.paralleluniverse:comsat-httpclient:0.7.0`
+    | [Retrofit](http://square.github.io/retrofit/) integration with fibers.                                                    | `co.paralleluniverse:comsat-retrofit:0.7.0`
+    | [JDBI](http://jdbi.org/) integration with fibers.                                                                         | `co.paralleluniverse:comsat-jdbi:0.7.0`
+    | JDBC integration with fibers.                                                                                             | `co.paralleluniverse:comsat-jdbc:0.7.0`
+    | [jOOQ](http://www.jooq.org/) integration with fibers.                                                                     | `co.paralleluniverse:comsat-jooq:0.7.0`
+    | MongoDB fiber-blocking integration for the [Allanbank API](http://www.allanbank.com/mongodb-async-driver/index.html).     | `co.paralleluniverse:comsat-mongodb-allanbank:0.7.0`
+    | [OkHttp](https://github.com/square/okhttp) HTTP+SPDY client integration.                                                  | `co.paralleluniverse:comsat-okhttp:0.7.0`
+    | The Web Actors API.                                                                                                       | `co.paralleluniverse:comsat-actors-api:0.7.0`
+    | Deploy HTTP, SSE and WebSocket Web Actors as [Undertow](http://undertow.io/) handlers.                                    | `co.paralleluniverse:comsat-actors-undertow:0.7.0`
+    | Deploy HTTP, SSE and WebSocket Web Actors as [Netty](http://netty.io/) handlers.                                          | `co.paralleluniverse:comsat-actors-netty:0.7.0`
+    | Deploy HTTP, SSE and WebSocket Web Actors in J2EE 7 Servlet and WebSocket (JSR-356) embedded and standalone containers.   | `co.paralleluniverse:comsat-actors-servlet:0.7.0`
+    | Use Comsat in the Tomcat servlet container without the java agent.                                                        | `co.paralleluniverse:comsat-tomcat-loader:0.7.0[:jdk8]` (for JDK 8 optionally add the `jdk8` classifier)
+    | Use Comsat in the Jetty servlet container without the java agent.                                                         | `co.paralleluniverse:comsat-jetty-loader:0.7.0[:jdk8]` (for JDK 8 optionally add the `jdk8` classifier)
+    | [Spring Framework](http://projects.spring.io/spring-framework/) Web integration allows using fiber-blocking controllers.  | `co.paralleluniverse:comsat-spring-web:0.7.0`
+    | [Apache Kafka](http://kafka.apache.org/) producer integration module.                                                     | `co.paralleluniverse:comsat-kafka:0.7.0`
+    | [Apache Shiro](http://shiro.apache.org/) realms integration module.                                                       | `co.paralleluniverse:comsat-shiro:0.7.0`
 
 ###并发模型
 - 流式模型
-- Actor模型
+
+ 流式模型的实现版本有很多：reactor, stream等
+ 
+ 1. stream
+
+        Java 8的一个显著特性就是增加了流式API
+        
+        ```java
+        public static List<String> getLowCaloricDishesNamesInJava7(List<Dish> dishes){
+            List<Dish> lowCaloricDishes = new ArrayList<>();
+            for(Dish d: dishes){
+                if(d.getCalories() < 400){
+                    lowCaloricDishes.add(d);
+                }
+            }
+            List<String> lowCaloricDishesName = new ArrayList<>();
+            Collections.sort(lowCaloricDishes, new Comparator<Dish>() {
+                public int compare(Dish d1, Dish d2){
+                    return Integer.compare(d1.getCalories(), d2.getCalories());
+                }
+            });
+            for(Dish d: lowCaloricDishes){
+                lowCaloricDishesName.add(d.getName());
+            }
+            return lowCaloricDishesName;
+        }
+        
+        public static List<String> getLowCaloricDishesNamesInJava8(List<Dish> dishes){
+            return dishes.stream()
+                    .filter(d -> d.getCalories() < 400)
+                    .sorted(comparing(Dish::getCalories))
+                    .map(Dish::getName)
+                    .collect(toList());
+        }
+        ```        
+        
+        对比这两个函数可读性（主观）上未必比普通逻辑更高，不过代码量确实有明显减少，这点不是流式编程的功劳，本质是lambda表达式的功劳，这个例子还不够明显，比较显著的例子是它能把分散的逻辑集中在一起，从而增强可维护性。
+        
+        stream的真正功劳是对并发处理变得更安全，看不到共享变量，线程也是不可见的:
+        
+        ```java
+        int calories = menu.parallelStream()
+                   .map(Dish::getCalories)
+                   .reduce(0, Integer::sum);
+        System.out.println("Number of calories:" + calories);
+
+        ```
+
+ 1. Reactor
+
+        曾经RxJava非常流行，几乎成为了Java下的异步模型的准标准
+ 
+- 消息模型
+
+ Actor Akka
+
 
