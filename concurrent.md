@@ -251,6 +251,9 @@ int main() {
 
 ```
 
+##### CAS
+原子操作中有一个比较广泛的应用就是Compare And Swap，利用这一特性可以构建无锁队列，JDK的ConcurrentHashMap也是基于这个特性实现的。
+
 ###优化实例
 
 下面结合猎豹项目来说明一个优化的例子
@@ -468,7 +471,7 @@ int main() {
 ###并发模型
 - 流式模型
 
- 流式模型的实现版本有很多：reactor, stream等
+ 流式模型的实现版本有很多：Java 8 stream, RxJava等
  
  1. stream
 
@@ -505,7 +508,7 @@ int main() {
         
         对比这两个函数可读性（主观）上未必比普通逻辑更高，不过代码量确实有明显减少，这点不是流式编程的功劳，本质是lambda表达式的功劳，这个例子还不够明显，比较显著的例子是它能把分散的逻辑集中在一起，从而增强可维护性。
         
-        stream的真正功劳是对并发处理变得更安全，看不到共享变量，线程也是不可见的:
+        stream的真正功劳是对并发处理变得更安全，下面是一个经典的map reduce 例子，没有共享变量，并发变得更加安全:
         
         ```java
         int calories = menu.parallelStream()
@@ -515,10 +518,76 @@ int main() {
 
         ```
 
- 1. Reactor
+ 1. Reactive
 
-        曾经RxJava非常流行，几乎成为了Java下的异步模型的准标准
+        响应式编程，曾经RxJava非常流行，几乎成为了Java下的异步模型的准标准。Java 8 的stream通过模型把任务变成可并发拆解的，但是返回结果是同步的。RxJava和stream从结构上类似，但是整体是返回结果可以是异步的。
+        
+        ```java
+        Flowable.just(Dish.menu)
+                .parallel()
+                .runOn(Schedulers.computation())//指定在哪些线程上并发执行
+                .flatMap(l -> Flowable.fromIterable(l))
+                .filter(d -> d.getCalories() < 400)
+                .sorted(comparing(Dish::getCalories))
+                .map(Dish::getName)
+                .toList()
+                .subscribe(it -> System.out.println("onNext:" + it + "  thread: " + Thread.currentThread()));
+                
+        ```
+        
+ 1. Flink
+
+        作为猎豹项目的主要组件之一Flink不得不提。Flink 1.8之后主要提供三类API：Stream, Table, SQL。
+        这里重点介绍的是Stream API使用:
+        
+        
+        ```java
+        public class WindowWordCount {
+
+            public static void main(String[] args) throws Exception {
+        
+                StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        
+                DataStream<Tuple2<String, Integer>> dataStream = env
+                        .socketTextStream("localhost", 9999)
+                        .flatMap(new Splitter())
+                        .keyBy(0)
+                        .timeWindow(Time.seconds(5))
+                        .sum(1);
+        
+                dataStream.print();
+        
+                env.execute("Window WordCount");
+            }
+        
+            public static class Splitter implements FlatMapFunction<String, Tuple2<String, Integer>> {
+                @Override
+                public void flatMap(String sentence, Collector<Tuple2<String, Integer>> out) throws Exception {
+                    for (String word: sentence.split(" ")) {
+                        out.collect(new Tuple2<String, Integer>(word, 1));
+                    }
+                }
+            }
+        
+        }
+
+        ```
  
+ 根据上述代码描述会生成下面的流图：
+ 
+ ![screenshot](word.png)
+ 
+    ####使用异同 
+    三种方式在API设计上都有相近的地方，但是使用场景和效果却有大不同。
+    Java 8 Stream 本身是pull based，所以只能同步返回结果，并发隐藏在内部。RxJava和Flink是push based，RxJava在runOn线程上有一定灵活性，所以可以做到异步监听。Flink的设计目的是分布式，所以每一个operator函数都是可串行化的，驱动流运转的不是最后的输出节点，而是env.execute。
+
+    ####缺点
+    
+    ####优化
+
+- Fork Join
+
+
 - 消息模型
 
  Actor Akka
